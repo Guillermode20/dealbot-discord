@@ -9,6 +9,7 @@ Game Sale Bot is a Discord bot designed to help users find the best deals on vid
 - 📊 Display detailed information about the best match found.
 - 🚫 Notify users when no deals are found for a specified game.
 - ℹ️ Provide information about the bot and its commands.
+- 🔔 Check sale reminders and notify users if their games are on sale.
 
 ## 📋 Commands
 

@@ -73,8 +73,30 @@ deal_url = "https://www.cheapshark.com/api/1.0/deals"
 @bot.command()
 async def info(ctx):
     """Provide information about the bot."""
-    embed = discord.Embed(title="Game Sale Bot", description="I am a cool bot made by big willy himself to help you find sales for games", color=0x00ff00)
-    embed.add_field(name="!sale <game name>", value="Find deals for a specific game", inline=False)
+    embed = discord.Embed(
+        title="Game Sale Bot",
+        description="Game Sale Bot helps you find the best deals on video games from various online stores.",
+        color=0x00ff00
+    )
+    embed.add_field(name="!sale <game name>", value="Fetch and display deals for the specified game.", inline=False)
+    embed.add_field(name="!info", value="Provide information about the bot.", inline=False)
+    embed.add_field(name="Features", value="""
+    - 🛒 Fetch and display deals for specified games.
+    - 🔍 Handle multiple close matches and prompt users to specify the title.
+    - 📊 Display detailed information about the best match found.
+    - 🚫 Notify users when no deals are found for a specified game.
+    - ℹ️ Provide information about the bot and its commands.
+    """, inline=False)
+    embed.add_field(name="Built With", value="""
+    - [discord.py](https://github.com/Rapptz/discord.py) - Python wrapper for the Discord API
+    - [aiohttp](https://github.com/aio-libs/aiohttp) - Asynchronous HTTP client/server framework
+    - [fuzzywuzzy](https://github.com/seatgeek/fuzzywuzzy) - Fuzzy string matching in Python
+    """, inline=False)
+    embed.add_field(name="License", value="This project is licensed under the MIT License.", inline=False)
+    embed.add_field(name="Acknowledgments", value="""
+    - Thanks to [CheapShark](https://www.cheapshark.com/) for providing the API for game deals.
+    - Inspiration and guidance from the Discord.py community.
+    """, inline=False)
     await ctx.send(embed=embed)
 
 @bot.command()
@@ -191,6 +213,11 @@ async def check_sale_reminders():
                         print(f"Channel {channel_id} found")
                         await channel.send(f"<@{discord_username_id}>, deal found for {game_title}:")
                         await handle_deals(channel, game_title, deals)  # Removed discord_username_id parameter
+                        # Remove the reminder from the database
+                        cursor.execute('DELETE FROM reminders WHERE discord_username_id = ? AND game_title = ? AND channel_id = ?', 
+                                    (discord_username_id, game_title, channel_id))
+                        conn.commit()
+                        print(f"Reminder for {game_title} removed from the database")
                     else:
                         print(f"Channel {channel_id} not found")
                 else:
