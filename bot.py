@@ -101,8 +101,14 @@ async def handle_deals(ctx, game_name, deals, discord_username_id=None):
         return
 
     if close_matches:
+        if isinstance(ctx, discord.TextChannel):
+            # Skip sending multiple matches message for automated checks
+            return
         await handle_close_matches(ctx, game_name, deals, close_matches)
     else:
+        if isinstance(ctx, discord.TextChannel):
+            # Skip sending no deals message for automated checks
+            return
         await send_no_deals_found(ctx, game_name)
 
 async def handle_close_matches(ctx, game_name, deals, close_matches):
@@ -133,27 +139,30 @@ async def send_deal(ctx, deals, best_match, discord_username_id=None):
     if discount_percentage == 0:
         embed.add_field(name="Discount", value="No discount available", inline=True)
         
-        # Create a button
-        button = Button(label="Add Sale Reminder", style=discord.ButtonStyle.primary)
-        
-        async def button_callback(interaction):
-            # Add the sale reminder to the database with channel_id
-            cursor.execute('INSERT INTO reminders (discord_username_id, game_title, channel_id) VALUES (?, ?, ?)', 
-                           (interaction.user.id, deal['title'], interaction.channel.id))
-            conn.commit()
-            await interaction.response.send_message(f"Sale reminder added for {deal['title']}", ephemeral=True)
+        # Only show the button if it's a command context (not an automated check)
+        if not isinstance(ctx, discord.TextChannel):
+            button = Button(label="Add Sale Reminder", style=discord.ButtonStyle.primary)
             
-            # Edit the original message to remove the view (button)
-            await interaction.message.edit(view=None)
-        
-        button.callback = button_callback
-
-        view = View()
-        view.add_item(button)
-        await ctx.send(content=f"{ctx.author.mention}", embed=embed, view=view)
+            async def button_callback(interaction):
+                cursor.execute('INSERT INTO reminders (discord_username_id, game_title, channel_id) VALUES (?, ?, ?)', 
+                               (interaction.user.id, deal['title'], interaction.channel.id))
+                conn.commit()
+                await interaction.response.send_message(f"Sale reminder added for {deal['title']}", ephemeral=True)
+                await interaction.message.edit(view=None)
+            
+            button.callback = button_callback
+            view = View()
+            view.add_item(button)
+            mention = ctx.author.mention
+            await ctx.send(content=mention, embed=embed, view=view)
+        else:
+            await ctx.send(embed=embed)
     else:
         embed.add_field(name="Discount", value=f"{discount_percentage}%", inline=True)
-        mention = f"@{discord_username_id}" if discord_username_id else f"{ctx.author.mention}"
+        if isinstance(ctx, discord.TextChannel):
+            mention = f"<@{discord_username_id}>" if discord_username_id else ""
+        else:
+            mention = ctx.author.mention
         await ctx.send(content=mention, embed=embed)
 
 async def send_no_deals_found(ctx, game_name):
@@ -181,7 +190,7 @@ async def check_sale_reminders():
                     if channel:
                         print(f"Channel {channel_id} found")
                         await channel.send(f"<@{discord_username_id}>, deal found for {game_title}:")
-                        await handle_deals(channel, game_title, deals, discord_username_id)
+                        await handle_deals(channel, game_title, deals)  # Removed discord_username_id parameter
                     else:
                         print(f"Channel {channel_id} not found")
                 else:
