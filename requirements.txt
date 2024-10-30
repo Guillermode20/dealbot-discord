@@ -2,3 +2,4 @@ discord.py
 aiohttp
 fuzzywuzzy
 requests
+sqlite3

@@ -10,10 +10,17 @@ import difflib
 from fuzzywuzzy import process, fuzz
 from discord.ui import Button, View
 from dotenv import load_dotenv
+import sqlite3
 
 # Load the environment variables from the .env file
 load_dotenv()
 TOKEN = os.getenv('BOT_TOKEN')
+
+conn = sqlite3.connect('sale_reminders.db')
+cursor = conn.cursor()
+
+cursor.execute('''CREATE TABLE IF NOT EXISTS reminders
+                (discord_username TEXT, game_title TEXT)''')
 
 # Define the store ID to name mapping
 store_id_to_name = {
