@@ -9,10 +9,11 @@ import aiohttp
 import difflib
 from fuzzywuzzy import process, fuzz
 from discord.ui import Button, View
+from dotenv import load_dotenv
 
-# Load the token from the token.txt file
-with open('token.txt', 'r') as file:
-    TOKEN = file.read().strip()
+# Load the environment variables from the .env file
+load_dotenv()
+TOKEN = os.getenv('BOT_TOKEN')
 
 # Define the store ID to name mapping
 store_id_to_name = {
