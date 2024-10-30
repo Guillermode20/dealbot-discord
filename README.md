@@ -51,10 +51,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📧 Contact
 
-If you have any questions, feel free to reach out:
-
-- **Email**: your-email@example.com
-- **Discord**: YourDiscordTag#1234
+Visit my [Website](will-hick-cv.click) for contacts and my other works.
 
 ## 🙏 Acknowledgments
 
